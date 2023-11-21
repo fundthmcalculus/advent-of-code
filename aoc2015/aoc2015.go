@@ -17,7 +17,7 @@ func loadInput(day int) string {
 	return string(b)
 }
 
-public func Problem1() {
+func Problem1() {
 	// Load p1.txt
 	lispData := loadInput(1)
 	curFloor := 0
