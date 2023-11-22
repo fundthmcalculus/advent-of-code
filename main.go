@@ -12,4 +12,5 @@ func main() {
 	//aoc2015.Problem4()
 	//aoc2015.Problem5()
 	aoc2015.Problem6()
+	aoc2015.Problem7()
 }

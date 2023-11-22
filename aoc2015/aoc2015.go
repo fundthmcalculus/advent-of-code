@@ -22,6 +22,14 @@ func loadInputLines(day int) []string {
 	return l
 }
 
+func loadTestInputLines(day int) []string {
+	l := strings.Split(loadTestInput(day), "\n")
+	for i := 0; i < len(l); i++ {
+		l[i] = strings.TrimSpace(l[i])
+	}
+	return l
+}
+
 func loadInput(day int) string {
 	b, err := os.ReadFile(path.Join(".", aoc2015, fmt.Sprintf("p%d.txt", day)))
 
@@ -159,9 +167,9 @@ func Problem5() {
 	fmt.Println("Problem 5B Answer:", nice2Count)
 }
 
-func str2int(s string) int {
-	i, _ := strconv.ParseInt(s, 10, 32)
-	return int(i)
+func str2int(s string) (int, bool) {
+	i, err := strconv.ParseInt(s, 10, 32)
+	return int(i), err == nil
 }
 
 func Problem6() {
@@ -208,6 +216,109 @@ func Problem6() {
 
 	fmt.Println("Problem 6A Answer:", isLit)
 	fmt.Println("Problem 6B Answer:", nordicBrightness)
+}
+
+func Problem7() {
+	circuitLines := loadInputLines(7)
+	circuits := evaluateCircuit(circuitLines)
+	aVal := circuits["a"]
+	// Crude hack to override "b"
+	circuitLines = loadInputLines(7)
+	circuitLines[89] = fmt.Sprintf("%d -> b", aVal)
+	circuits = evaluateCircuit(circuitLines)
+	fmt.Println("Problem 7A Answer:", aVal)
+	fmt.Println("Problem 7B Answer:", circuits["a"])
+}
+
+func evaluateCircuit(circuitLines []string) map[string]uint16 {
+	circuits := make(map[string]uint16)
+	var wire1, wire2, op, tgt string
+	// Loop forever through the input deck
+	idx := 0
+	for len(circuitLines) > 0 {
+		line := circuitLines[idx]
+		tokens := strings.Split(line, " ")
+
+		if len(tokens) == 3 {
+			// Assignment
+			wire1 = tokens[0]
+			tgt = tokens[2]
+			wire1val, ok1 := getWireValue(circuits, wire1)
+			if ok1 {
+				circuits[tgt] = wire1val
+				// Remove this line
+				circuitLines, idx = dropCircuitLine(circuitLines, idx)
+				continue
+			}
+		} else if len(tokens) == 4 {
+			// Unary operator
+			op = tokens[0]
+			if op != "NOT" {
+				panic("Unsupported operation")
+			}
+			wire1 = tokens[1]
+			tgt = tokens[3]
+			wire1val, ok1 := getWireValue(circuits, wire1)
+			if ok1 {
+				if op == "NOT" {
+					circuits[tgt] = ^wire1val
+				} else {
+					circuits[tgt] = circuits[op]
+				}
+				// Remove this line
+				circuitLines, idx = dropCircuitLine(circuitLines, idx)
+				continue
+			}
+		} else if len(tokens) == 5 {
+			// Binary operator
+			wire1 = tokens[0]
+			op = tokens[1]
+			wire2 = tokens[2]
+			tgt = tokens[4]
+			wire1val, ok1 := getWireValue(circuits, wire1)
+			wire2val, ok2 := getWireValue(circuits, wire2)
+			if ok1 && ok2 {
+				// Perform the operation
+				if op == "AND" {
+					circuits[tgt] = wire1val & wire2val
+				} else if op == "OR" {
+					circuits[tgt] = wire1val | wire2val
+				} else if op == "LSHIFT" {
+					circuits[tgt] = wire1val << wire2val
+				} else if op == "RSHIFT" {
+					circuits[tgt] = wire1val >> wire2val
+				} else {
+					panic(fmt.Sprintf("Unsupported op code %s", op))
+				}
+				// Remove this line
+				circuitLines, idx = dropCircuitLine(circuitLines, idx)
+				continue
+			}
+		}
+		// Go to the next line, wrap back around.
+		idx++
+		if idx >= len(circuitLines) {
+			idx = 0
+		}
+	}
+	return circuits
+}
+
+func getWireValue(circuits map[string]uint16, wire1 string) (uint16, bool) {
+	wire1val, ok1 := circuits[wire1]
+	val1, isint1 := str2int(wire1)
+	// Sometimes, it's a constant, that's okay
+	if !ok1 && isint1 {
+		wire1val = uint16(val1)
+		ok1 = isint1
+	}
+	return wire1val, ok1
+}
+
+func dropCircuitLine(circuitLines []string, idx int) ([]string, int) {
+	circuitLines = append(circuitLines[:idx], circuitLines[idx+1:]...)
+	idx = 0
+	return circuitLines, idx
 }
 
 func isNice2(s string) bool {
