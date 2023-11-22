@@ -1,6 +1,7 @@
 package aoc2015
 
 import (
+	"crypto/md5"
 	"fmt"
 	"math"
 	"os"
@@ -102,6 +103,36 @@ func Problem3() {
 	robotHouses := santaRoute(directions, 1)
 	drunkHouses := append(santaHouses, robotHouses...)
 	fmt.Println("Problem 3B Answer:", len(gotOnePresent(drunkHouses)))
+}
+
+func Problem4() {
+	input := "yzbqklnj"
+	key := 1
+	for {
+		outputData := md5.Sum([]byte(input + fmt.Sprint(key)))
+		isZero := outputData[2]>>4 == 0
+		for i := 0; i < 2; i++ {
+			isZero = isZero && outputData[i] == 0
+		}
+		if isZero {
+			fmt.Println("Problem 4A Answer:", key, isZero)
+			break
+		}
+		key++
+	}
+	key = 1
+	for {
+		outputData := md5.Sum([]byte(input + fmt.Sprint(key)))
+		isZero := true
+		for i := 0; i < 3; i++ {
+			isZero = isZero && outputData[i] == 0
+		}
+		if isZero {
+			fmt.Println("Problem 4B Answer:", key, isZero)
+			break
+		}
+		key++
+	}
 }
 
 func gotOnePresent(houses [][2]int) [][2]int {

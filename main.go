@@ -9,4 +9,5 @@ func main() {
 	aoc2015.Problem1()
 	aoc2015.Problem2()
 	aoc2015.Problem3()
+	aoc2015.Problem4()
 }
