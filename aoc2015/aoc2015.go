@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -156,6 +157,57 @@ func Problem5() {
 	}
 	fmt.Println("Problem 5A Answer:", niceCount)
 	fmt.Println("Problem 5B Answer:", nice2Count)
+}
+
+func str2int(s string) int {
+	i, _ := strconv.ParseInt(s, 10, 32)
+	return int(i)
+}
+
+func Problem6() {
+	instructions := loadInputLines(6)
+	re := regexp.MustCompile(`(?m)(?P<step>turn on|turn off|toggle)\s*(?P<x1>\d+),(?P<y1>\d+)\s*\w*\s*(?P<x2>\d+),(?P<y2>\d+)`)
+	// Initializing to everything off
+	var lights [1000][1000]bool
+	var nordicLights [1000][1000]int
+	for _, instruction := range instructions {
+		matchSteps := re.FindStringSubmatch(instruction)
+		coordinates := toInt(matchSteps[2:])
+		x1 := coordinates[0]
+		y1 := coordinates[1]
+		x2 := coordinates[2]
+		y2 := coordinates[3]
+		for x := x1; x <= x2; x++ {
+			for y := y1; y <= y2; y++ {
+				instr := matchSteps[1]
+				if instr == "turn on" {
+					lights[x][y] = true
+					nordicLights[x][y]++
+				} else if instr == "turn off" {
+					lights[x][y] = false
+					nordicLights[x][y]--
+				} else if instr == "toggle" {
+					lights[x][y] = !lights[x][y]
+					nordicLights[x][y] += 2
+				}
+				nordicLights[x][y] = max(nordicLights[x][y], 0)
+			}
+		}
+	}
+	// Count all trues
+	isLit := 0
+	nordicBrightness := 0
+	for x := 0; x < len(lights); x++ {
+		for y := 0; y < len(lights); y++ {
+			if lights[x][y] {
+				isLit++
+			}
+			nordicBrightness += nordicLights[x][y]
+		}
+	}
+
+	fmt.Println("Problem 6A Answer:", isLit)
+	fmt.Println("Problem 6B Answer:", nordicBrightness)
 }
 
 func isNice2(s string) bool {
