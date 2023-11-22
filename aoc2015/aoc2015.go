@@ -13,6 +13,14 @@ import (
 
 const aoc2015 = "aoc2015"
 
+func loadInputLines(day int) []string {
+	l := strings.Split(loadInput(day), "\n")
+	for i := 0; i < len(l); i++ {
+		l[i] = strings.TrimSpace(l[i])
+	}
+	return l
+}
+
 func loadInput(day int) string {
 	b, err := os.ReadFile(path.Join(".", aoc2015, fmt.Sprintf("p%d.txt", day)))
 
@@ -79,12 +87,11 @@ func Problem1() {
 }
 
 func Problem2() {
-	data := loadInput(2)
-	packages := strings.Split(data, "\n")
+	packages := loadInputLines(2)
 	totalWrap := 0
 	totalRibbon := 0
 	for _, p := range packages {
-		dims := toInt(strings.Split(strings.TrimSpace(p), "x"))
+		dims := toInt(strings.Split(p, "x"))
 		slices.Sort(dims)
 		wrap := 3*dims[0]*dims[1] + 2*dims[1]*dims[2] + 2*dims[0]*dims[2]
 		totalWrap += wrap
@@ -133,6 +140,64 @@ func Problem4() {
 		}
 		key++
 	}
+}
+
+func Problem5() {
+	words := loadInputLines(5)
+	niceCount := 0
+	nice2Count := 0
+	for _, w := range words {
+		if isNice1(w) {
+			niceCount++
+		}
+		if isNice2(w) {
+			nice2Count++
+		}
+	}
+	fmt.Println("Problem 5A Answer:", niceCount)
+	fmt.Println("Problem 5B Answer:", nice2Count)
+}
+
+func isNice2(s string) bool {
+	skipRepeats := 0
+	repeatPairs := 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if i > 0 {
+			c2 := s[i-1 : i+1]
+			for j := i + 1; j < len(s)-1; j++ {
+				if c2 == s[j:j+2] {
+					repeatPairs++
+					break
+				}
+			}
+		}
+		if i > 1 && c == s[i-2] {
+			skipRepeats++
+		}
+	}
+	return repeatPairs > 0 && skipRepeats > 0
+}
+
+func isNice1(s string) bool {
+	vowelCount := 0
+	vowels := []uint8{'a', 'e', 'i', 'o', 'u'}
+	forbiddenStrings := []string{"ab", "cd", "pq", "xy"}
+	hasForbidden := false
+	repeatedLetters := 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if slices.Contains(vowels, c) {
+			vowelCount++
+		}
+		if i > 0 && c == s[i-1] {
+			repeatedLetters++
+		}
+		if i > 0 && slices.Contains(forbiddenStrings, s[i-1:i+1]) {
+			hasForbidden = true
+		}
+	}
+	return vowelCount >= 3 && repeatedLetters > 0 && !hasForbidden
 }
 
 func gotOnePresent(houses [][2]int) [][2]int {
