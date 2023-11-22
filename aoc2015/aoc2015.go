@@ -2,6 +2,7 @@ package aoc2015
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"slices"
@@ -40,6 +41,23 @@ func toInt(x []string) []int {
 	return y
 }
 
+type numeric interface {
+	// TODO - Other types
+	int | float64 | int32 | int64
+}
+
+func sumSquare[S ~[]E, E numeric](x S) float64 {
+	sS := 0.0
+	for _, x1 := range x {
+		sS += float64(x1) * float64(x1)
+	}
+	return sS
+}
+
+func magnitude[S ~[]E, E numeric](x S) float64 {
+	return math.Sqrt(sumSquare(x))
+}
+
 func Problem1() {
 	// Load p1.txt
 	lispData := loadInput(1)
@@ -73,4 +91,59 @@ func Problem2() {
 	}
 	fmt.Println("Problem 2A Answer:", totalWrap)
 	fmt.Println("Problem 2B Answer:", totalRibbon)
+}
+
+func Problem3() {
+	directions := loadInput(3)
+	houses := santaRoute(directions, -1)
+	uniqueHouses := gotOnePresent(houses)
+	fmt.Println("Problem 3A Answer:", len(uniqueHouses))
+	santaHouses := santaRoute(directions, 0)
+	robotHouses := santaRoute(directions, 1)
+	drunkHouses := append(santaHouses, robotHouses...)
+	fmt.Println("Problem 3B Answer:", len(gotOnePresent(drunkHouses)))
+}
+
+func gotOnePresent(houses [][2]int) [][2]int {
+	sortFunc := func(a, b [2]int) int {
+		if a[0] == b[0] && a[1] == b[1] {
+			return 0
+		}
+		A := magnitude(a[:])
+		B := magnitude(b[:])
+		if A > B {
+			return 1
+		} else {
+			return -1
+		}
+	}
+	compFunc := func(a, b [2]int) bool {
+		return a[0] == b[0] && a[1] == b[1]
+	}
+	slices.SortFunc(houses, sortFunc)
+	uniqueHouses := slices.CompactFunc(houses, compFunc)
+	return uniqueHouses
+}
+
+func santaRoute(directions string, santaMod int) [][2]int {
+	var houses [][2]int
+	loc := [2]int{0, 0}
+	houses = append(houses, loc)
+	for i, curDir := range directions {
+		// Santamod < 0 is do everything
+		if santaMod >= 0 && i%2 != santaMod {
+			continue
+		}
+		if curDir == '>' {
+			loc[0]++
+		} else if curDir == '<' {
+			loc[0]--
+		} else if curDir == '^' {
+			loc[1]++
+		} else if curDir == 'v' {
+			loc[1]--
+		}
+		houses = append(houses, loc)
+	}
+	return houses
 }
