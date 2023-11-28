@@ -72,6 +72,15 @@ func sumSquare[S ~[]E, E numeric](x S) float64 {
 	return sS
 }
 
+func inSlice[S ~[]E, E numeric](x S, y E) bool {
+	for i := 0; i < len(x); i++ {
+		if x[i] == y {
+			return true
+		}
+	}
+	return false
+}
+
 func magnitude[S ~[]E, E numeric](x S) float64 {
 	return math.Sqrt(sumSquare(x))
 }
@@ -270,6 +279,69 @@ func Problem8() {
 
 	fmt.Println("Problem 8A Answer:", totalCodeCharCount-totalMemChars)
 	fmt.Println("Problem 8B Answer:", totalNewEncodedCount-totalCodeCharCount)
+}
+
+func Problem9() {
+	distValues := loadInputLines(9)
+	N := int((math.Sqrt(float64(1+8*len(distValues))) - 1) / 2)
+	// Fill out the full matrix (symmetric)
+	Nc := N + 1
+	var distMat = make([][]int, Nc)
+	for i := 0; i < Nc; i++ {
+		distMat[i] = make([]int, Nc)
+	}
+	// They're in order.
+	mj := 0
+	mi := 0
+	stepRow := N + 1
+	for _, dL := range distValues {
+		dist, _ := str2int(dL[strings.Index(dL, "= ")+2:])
+		// Principal diagonal should be empty.
+		stepRow--
+		if stepRow == 0 {
+			mi++
+			stepRow = N - mi
+			mj = mi + 1
+		} else {
+			mj++
+		}
+		distMat[mi][mj] = dist
+		distMat[mj][mi] = dist
+	}
+
+	// Find the shortest route - exhaustive search
+	shortestRoute := math.MaxInt
+	for startCity := 0; startCity < N; startCity++ {
+		shortestRoute = min(shortestRoute, findShortestRoute(distMat, []int{startCity}, startCity))
+	}
+	// Longest route is minimum negative distance
+	for i := 0; i < len(distMat); i++ {
+		for j := 0; j < len(distMat); j++ {
+			distMat[i][j] = -distMat[i][j]
+		}
+	}
+	longestRoute := 0
+	for startCity := 0; startCity < N; startCity++ {
+		longestRoute = min(longestRoute, findShortestRoute(distMat, []int{startCity}, startCity))
+	}
+	fmt.Println("Problem 9A Answer:", shortestRoute)
+	fmt.Println("Problem 9B Answer:", -longestRoute)
+}
+
+func findShortestRoute(distMat [][]int, usedCities []int, fromCity int) int {
+	minDist := math.MaxInt
+	// Run through unused cities
+	for toCity := 0; toCity < len(distMat); toCity++ {
+		// Skip used cities
+		if !inSlice(usedCities, toCity) {
+			minDist = min(minDist, distMat[fromCity][toCity]+findShortestRoute(distMat, append(usedCities, toCity), toCity))
+		}
+	}
+	// We've already hit everything
+	if minDist == math.MaxInt {
+		return 0
+	}
+	return minDist
 }
 
 func evaluateCircuit(circuitLines []string) map[string]uint16 {
