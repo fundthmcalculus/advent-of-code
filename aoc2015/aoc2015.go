@@ -230,6 +230,48 @@ func Problem7() {
 	fmt.Println("Problem 7B Answer:", circuits["a"])
 }
 
+func Problem8() {
+	stringLines := loadInputLines(8)
+	totalCodeCharCount := 0
+	totalMemChars := 0
+	totalNewEncodedCount := 0
+	for _, line := range stringLines {
+		totalCodeCharCount += len(line)
+		// Strip the leading/trailing quotes
+		totalNewEncodedCount += 6 // for the removed wrapper quotes
+		if len(line) < 3 {
+			continue
+		}
+		line = line[1 : len(line)-1]
+		// Loop and count
+		idx := 0
+		for idx < len(line) {
+			if line[idx] == '\\' {
+				// Look-ahead
+				laChar := line[idx+1]
+				if laChar == '\\' || laChar == '"' {
+					// Skip 1
+					idx++
+					totalNewEncodedCount += 3
+				} else if laChar == 'x' {
+					// Jump three
+					idx += 3
+					totalNewEncodedCount += 4
+				} else {
+					panic("Invalid escape sequence!")
+				}
+			} else {
+			}
+			totalMemChars++
+			idx++
+			totalNewEncodedCount++
+		}
+	}
+
+	fmt.Println("Problem 8A Answer:", totalCodeCharCount-totalMemChars)
+	fmt.Println("Problem 8B Answer:", totalNewEncodedCount-totalCodeCharCount)
+}
+
 func evaluateCircuit(circuitLines []string) map[string]uint16 {
 	circuits := make(map[string]uint16)
 	var wire1, wire2, op, tgt string
