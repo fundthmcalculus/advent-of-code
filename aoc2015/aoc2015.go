@@ -328,6 +328,40 @@ func Problem9() {
 	fmt.Println("Problem 9B Answer:", -longestRoute)
 }
 
+func Problem10() {
+	// Loop through the string
+	num1 := "3113322113"
+	for i := 0; i < 40; i++ {
+		num1 = lookAndSay(num1)
+	}
+	fmt.Println("Problem 10A Answer:", len(num1))
+	num2 := num1
+	for i := 0; i < 10; i++ {
+		num2 = lookAndSay(num2)
+	}
+	fmt.Println("Problem 10B Answer:", len(num2))
+}
+
+func lookAndSay(num string) string {
+	// Loop through string, replacing run of digits with count
+	newNum := ""
+	idx := 0
+	for idx < len(num) {
+		cchr := num[idx]
+		chrCnt := 1
+		// Loop forward while number matches
+		for idx+chrCnt < len(num) {
+			if num[idx+chrCnt] != cchr {
+				break
+			}
+			chrCnt++
+		}
+		idx += chrCnt
+		newNum += strconv.FormatInt(int64(chrCnt), 10) + string(cchr)
+	}
+	return newNum
+}
+
 func findShortestRoute(distMat [][]int, usedCities []int, fromCity int) int {
 	minDist := math.MaxInt
 	// Run through unused cities
