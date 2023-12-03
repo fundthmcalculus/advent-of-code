@@ -3,9 +3,9 @@ package aoc2015
 import (
 	"crypto/md5"
 	"fmt"
+	"github.com/fundthmcalculus/advent-of-code/helpers"
+	_ "github.com/fundthmcalculus/advent-of-code/helpers"
 	"math"
-	"os"
-	"path"
 	"regexp"
 	"slices"
 	"strconv"
@@ -14,80 +14,9 @@ import (
 
 const aoc2015 = "aoc2015"
 
-func loadInputLines(day int) []string {
-	l := strings.Split(loadInput(day), "\n")
-	for i := 0; i < len(l); i++ {
-		l[i] = strings.TrimSpace(l[i])
-	}
-	return l
-}
-
-func loadTestInputLines(day int) []string {
-	l := strings.Split(loadTestInput(day), "\n")
-	for i := 0; i < len(l); i++ {
-		l[i] = strings.TrimSpace(l[i])
-	}
-	return l
-}
-
-func loadInput(day int) string {
-	b, err := os.ReadFile(path.Join(".", aoc2015, fmt.Sprintf("p%d.txt", day)))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return string(b)
-}
-
-func loadTestInput(day int) string {
-	b, err := os.ReadFile(path.Join(".", aoc2015, fmt.Sprintf("p%d-test.txt", day)))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return string(b)
-}
-
-func toInt(x []string) []int {
-	var y []int
-	for i := 0; i < len(x); i++ {
-		xi, _ := strconv.ParseInt(x[i], 10, 32)
-		y = append(y, int(xi))
-	}
-	return y
-}
-
-type numeric interface {
-	// TODO - Other types
-	int | float64 | int32 | int64
-}
-
-func sumSquare[S ~[]E, E numeric](x S) float64 {
-	sS := 0.0
-	for _, x1 := range x {
-		sS += float64(x1) * float64(x1)
-	}
-	return sS
-}
-
-func inSlice[S ~[]E, E numeric](x S, y E) bool {
-	for i := 0; i < len(x); i++ {
-		if x[i] == y {
-			return true
-		}
-	}
-	return false
-}
-
-func magnitude[S ~[]E, E numeric](x S) float64 {
-	return math.Sqrt(sumSquare(x))
-}
-
 func Problem1() {
 	// Load p1.txt
-	lispData := loadInput(1)
+	lispData := helpers.LoadInput(2015, 1, false)
 	curFloor := 0
 	basementBegin := 0
 	for i := 0; i < len(lispData); i++ {
@@ -105,11 +34,11 @@ func Problem1() {
 }
 
 func Problem2() {
-	packages := loadInputLines(2)
+	packages := helpers.LoadInputLines(2015, 2, false)
 	totalWrap := 0
 	totalRibbon := 0
 	for _, p := range packages {
-		dims := toInt(strings.Split(p, "x"))
+		dims := helpers.ToInt(strings.Split(p, "x"))
 		slices.Sort(dims)
 		wrap := 3*dims[0]*dims[1] + 2*dims[1]*dims[2] + 2*dims[0]*dims[2]
 		totalWrap += wrap
@@ -120,7 +49,7 @@ func Problem2() {
 }
 
 func Problem3() {
-	directions := loadInput(3)
+	directions := helpers.LoadInput(2015, 3, false)
 	houses := santaRoute(directions, -1)
 	uniqueHouses := gotOnePresent(houses)
 	fmt.Println("Problem 3A Answer:", len(uniqueHouses))
@@ -161,7 +90,7 @@ func Problem4() {
 }
 
 func Problem5() {
-	words := loadInputLines(5)
+	words := helpers.LoadInputLines(2015, 5, false)
 	niceCount := 0
 	nice2Count := 0
 	for _, w := range words {
@@ -182,14 +111,14 @@ func str2int(s string) (int, bool) {
 }
 
 func Problem6() {
-	instructions := loadInputLines(6)
+	instructions := helpers.LoadInputLines(2015, 6, false)
 	re := regexp.MustCompile(`(?m)(?P<step>turn on|turn off|toggle)\s*(?P<x1>\d+),(?P<y1>\d+)\s*\w*\s*(?P<x2>\d+),(?P<y2>\d+)`)
 	// Initializing to everything off
 	var lights [1000][1000]bool
 	var nordicLights [1000][1000]int
 	for _, instruction := range instructions {
 		matchSteps := re.FindStringSubmatch(instruction)
-		coordinates := toInt(matchSteps[2:])
+		coordinates := helpers.ToInt(matchSteps[2:])
 		x1 := coordinates[0]
 		y1 := coordinates[1]
 		x2 := coordinates[2]
@@ -228,11 +157,11 @@ func Problem6() {
 }
 
 func Problem7() {
-	circuitLines := loadInputLines(7)
+	circuitLines := helpers.LoadInputLines(2015, 7, false)
 	circuits := evaluateCircuit(circuitLines)
 	aVal := circuits["a"]
 	// Crude hack to override "b"
-	circuitLines = loadInputLines(7)
+	circuitLines = helpers.LoadInputLines(2015, 7, false)
 	circuitLines[89] = fmt.Sprintf("%d -> b", aVal)
 	circuits = evaluateCircuit(circuitLines)
 	fmt.Println("Problem 7A Answer:", aVal)
@@ -240,7 +169,7 @@ func Problem7() {
 }
 
 func Problem8() {
-	stringLines := loadInputLines(8)
+	stringLines := helpers.LoadInputLines(2015, 8, false)
 	totalCodeCharCount := 0
 	totalMemChars := 0
 	totalNewEncodedCount := 0
@@ -282,7 +211,7 @@ func Problem8() {
 }
 
 func Problem9() {
-	distValues := loadInputLines(9)
+	distValues := helpers.LoadInputLines(2015, 9, false)
 	N := int((math.Sqrt(float64(1+8*len(distValues))) - 1) / 2)
 	// Fill out the full matrix (symmetric)
 	Nc := N + 1
@@ -367,7 +296,7 @@ func findShortestRoute(distMat [][]int, usedCities []int, fromCity int) int {
 	// Run through unused cities
 	for toCity := 0; toCity < len(distMat); toCity++ {
 		// Skip used cities
-		if !inSlice(usedCities, toCity) {
+		if !helpers.InSlice(usedCities, toCity) {
 			minDist = min(minDist, distMat[fromCity][toCity]+findShortestRoute(distMat, append(usedCities, toCity), toCity))
 		}
 	}
@@ -516,8 +445,8 @@ func gotOnePresent(houses [][2]int) [][2]int {
 		if a[0] == b[0] && a[1] == b[1] {
 			return 0
 		}
-		A := magnitude(a[:])
-		B := magnitude(b[:])
+		A := helpers.Magnitude(a[:])
+		B := helpers.Magnitude(b[:])
 		if A > B {
 			return 1
 		} else {
