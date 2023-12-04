@@ -34,15 +34,69 @@ func LoadInput(year int, day int, test bool) string {
 func ToInt(x []string) []int {
 	var y []int
 	for i := 0; i < len(x); i++ {
+		if x[i] == "" {
+			continue
+		}
 		xi, _ := strconv.ParseInt(x[i], 10, 32)
 		y = append(y, int(xi))
 	}
 	return y
 }
 
+func Add[S ~[]E, E Numeric](x E, y S) S {
+	var z S
+	for _, y1 := range y {
+		z = append(z, x+y1)
+	}
+	return z
+}
+
+func Range[S Numeric](x S, y S) []S {
+	var z []S
+	for i := x; i <= y; i++ {
+		z = append(z, i)
+	}
+	return z
+}
+
+func Pow[S Numeric](x S, y S) S {
+	return S(math.Pow(float64(x), float64(y)))
+}
+
+func Sum[S Numeric](x []S) S {
+	var z S
+	for _, x1 := range x {
+		z += x1
+	}
+	return z
+}
+
 type Numeric interface {
 	// TODO - Other types
 	int | float64 | int32 | int64
+}
+
+func Intersect[S ~[]E, E Numeric](x S, y S) S {
+	//compFunc := func(a, b E) int {
+	//	if a < b {
+	//		return -1
+	//	}
+	//	if a == b {
+	//		return 0
+	//	}
+	//	return 1
+	//}
+	//slices.SortFunc(x, compFunc)
+	//slices.SortFunc(y, compFunc)
+	var z S
+	for _, x1 := range x {
+		for _, y1 := range y {
+			if x1 == y1 {
+				z = append(z, x1)
+			}
+		}
+	}
+	return z
 }
 
 func SumSquare[S ~[]E, E Numeric](x S) float64 {

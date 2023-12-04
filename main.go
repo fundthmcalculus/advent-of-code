@@ -16,6 +16,8 @@ func main() {
 	//aoc2015.Problem8()
 	//aoc2015.Problem9()
 	//aoc2015.Problem10()
-	aoc2023.Problem1()
-	aoc2023.Problem2()
+	//aoc2023.Problem1()
+	//aoc2023.Problem2()
+	aoc2023.Problem3()
+	//aoc2023.Problem4()
 }

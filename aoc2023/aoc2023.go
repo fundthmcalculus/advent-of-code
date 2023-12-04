@@ -8,6 +8,105 @@ import (
 	"unicode"
 )
 
+func Problem4() {
+	cards := helpers.LoadInputLines(2023, 4, false)
+	totalPoints := 0
+	cardsWon := map[int][]int{}
+	for i, card := range cards {
+		// Remove unnecessary prefix
+		card = card[strings.Index(card, ":")+1:]
+		// Split at |
+		cardHalves := strings.Split(card, "|")
+		winNumbers := helpers.ToInt(strings.Split(strings.TrimSpace(cardHalves[0]), " "))
+		myNumbers := helpers.ToInt(strings.Split(strings.TrimSpace(cardHalves[1]), " "))
+		// Find the number of wins (intersection count)
+		myWins := helpers.Intersect(winNumbers, myNumbers)
+		winCnt := len(myWins)
+		if winCnt > 0 {
+			cardsWon[i+1] = helpers.Range(i+2, i+1+len(myWins))
+			cardPoints := helpers.Pow(2, winCnt-1)
+			fmt.Println("Card", i+1, "wins:", cardPoints, "points", myWins, "bonus cards", cardsWon[i+1])
+			totalPoints += cardPoints
+		}
+	}
+	cardCounts := make([]int, len(cards)+1)
+	for cardId := 1; cardId <= len(cards); cardId++ {
+		// Start with 1 of each card
+		cardCounts[cardId] += 1
+		// Now, add the cards won (which will be after this one)
+		for _, wonId := range cardsWon[cardId] {
+			cardCounts[wonId] += cardCounts[cardId]
+		}
+	}
+	fmt.Println("Problem 4A:", totalPoints)
+	fmt.Println("Problem 4B:", helpers.Sum(cardCounts))
+}
+
+func Problem3() {
+	lines := helpers.LoadInputLines(2023, 3, false)
+	partNrSum := int64(0)
+	possibleGears := make(map[int]map[int][]int)
+	for y := 0; y < len(lines); y++ {
+		x1 := -1
+		x2 := -1
+		curLine := lines[y]
+		for x := 0; x < len(curLine); x++ {
+			// Check if this is a digit
+			isDigit := unicode.IsDigit(rune(curLine[x]))
+			if isDigit {
+				if x1 < 0 {
+					x1 = x
+				}
+				x2 = x
+			}
+			if !isDigit || x == len(curLine)-1 {
+				if x1 < 0 || x2 < 0 {
+					continue
+				}
+				// This is a number
+				for iy := max(0, y-1); iy <= min(len(lines)-1, y+1); iy++ {
+					for ix := max(0, x1-1); ix <= min(len(lines[iy])-1, x2+1); ix++ {
+						c := lines[iy][ix]
+						if !unicode.IsDigit(rune(c)) && c != '.' {
+							partNr, _ := strconv.ParseInt(curLine[x1:x2+1], 10, 64)
+							//fmt.Println("Part number:", partNr, string(c))
+
+							// Gear candidates have '*'
+							if c == '*' {
+								//fmt.Println("Gear candidate:", ix, iy)
+								// Preallocate
+								if possibleGears[ix] == nil {
+									possibleGears[ix] = make(map[int][]int)
+								}
+								possibleGears[ix][iy] = append(possibleGears[ix][iy], int(partNr))
+							}
+
+							partNrSum += partNr
+							goto nextPart
+						}
+					}
+				}
+			nextPart:
+				x1 = -1
+				x2 = -1
+			}
+		}
+	}
+	// Gears are the ones with only 2 part Nrs
+	totalRatios := 0
+	for ix, possibleGearsY := range possibleGears {
+		for iy, partNrs := range possibleGearsY {
+			if len(partNrs) == 2 {
+				gearRatio := partNrs[0] * partNrs[1]
+				totalRatios += gearRatio
+				//fmt.Println("Gear at", ix, iy, "with part numbers", partNrs, "Ratio:", gearRatio)
+			}
+		}
+	}
+	fmt.Println("Problem 3A:", partNrSum)
+	fmt.Println("Problem 3B:", totalRatios)
+}
+
 func makeEmptyBag() map[string]int64 {
 	bag := make(map[string]int64)
 	bag["red"] = 0
