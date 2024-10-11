@@ -278,6 +278,100 @@ func Problem10() {
 	fmt.Println("Problem 10B Answer:", len(num2))
 }
 
+func Problem11() {
+	fmt.Println("Problem 11 Tests:")
+	problem11Requirements(str2uint8slice("hijklmmn"))
+	problem11Requirements(str2uint8slice("abbceffg"))
+	problem11Requirements(str2uint8slice("abbcegjk"))
+
+	fmt.Println("Test Password:", findValidPassword("abcdefgh"))
+	passwordA := findValidPassword("hepxcrrq")
+	fmt.Println("Problem 11A Answer:", passwordA)
+	fmt.Println("Problem 11B Answer:", findValidPassword(passwordA))
+}
+
+func findValidPassword(password string) string {
+	testPassword := str2uint8slice(password)
+	// Find the next valid password
+	if problem11Requirements(testPassword) {
+		testPassword = indexPassword(testPassword)
+	}
+	for !problem11Requirements(testPassword) {
+		testPassword = indexPassword(testPassword)
+	}
+	return uint8slice2str(testPassword)
+}
+
+func uint8slice2str(s []uint8) string {
+	var s2 []rune
+	for _, c := range s {
+		s2 = append(s2, rune(c))
+	}
+	return string(s2)
+}
+
+func str2uint8slice(s string) []uint8 {
+	var s2 []uint8
+	for _, c := range s {
+		s2 = append(s2, uint8(c))
+	}
+	return s2
+}
+
+func indexPassword(password []uint8) []uint8 {
+	// Find the last character that is not 'z'
+	password[len(password)-1]++
+	for i := len(password) - 1; i >= 0; i-- {
+		if password[i] > 'z' {
+			password[i] = 'a'
+			if i > 0 {
+				password[i-1]++
+			}
+		} else {
+			break
+		}
+	}
+	return password
+}
+
+func problem11Requirements(password []uint8) bool {
+	return problem11Requirement1(password) && problem11Requirement2(password) && problem11Requirement3(password)
+}
+
+func problem11Requirement3(password []uint8) bool {
+	// Passwords must contain at least two different, non-overlapping pairs of letters
+	pairCount := 0
+	for i := 0; i < len(password)-1; i++ {
+		if password[i] == password[i+1] {
+			pairCount++
+			// Skip the next one so we don't get "aaa" as "aa" and "aa"
+			i++
+		}
+	}
+	return pairCount >= 2
+}
+
+func problem11Requirement2(password []uint8) bool {
+	// Passwords may not contain the letters i, o, or l
+	// Check for forbidden letters
+	for _, c := range password {
+		if c == 'i' || c == 'o' || c == 'l' {
+			return false
+		}
+	}
+	return true
+}
+
+func problem11Requirement1(password []uint8) bool {
+	// Check for an increasing straight of 3
+	for i := 0; i < len(password)-2; i++ {
+		if password[i]+1 == password[i+1] && password[i+1]+1 == password[i+2] {
+			return true
+		}
+	}
+	return false
+}
+
 func lookAndSay2(num []uint8) []uint8 {
 	// Loop through string, replacing run of digits with count
 	var newNum []uint8
