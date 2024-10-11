@@ -258,6 +258,13 @@ func Problem9() {
 }
 
 func Problem10() {
+	// Run the test operations
+	num0 := "1"
+	fmt.Println("Problem 10 Test:")
+	for i := 0; i <= 4; i++ {
+		num0 = lookAndSay(num0)
+		fmt.Println(num0)
+	}
 	// Loop through the string
 	num1 := "3113322113"
 	for i := 0; i < 40; i++ {
@@ -271,11 +278,10 @@ func Problem10() {
 	fmt.Println("Problem 10B Answer:", len(num2))
 }
 
-func lookAndSay(num string) string {
+func lookAndSay2(num []uint8) []uint8 {
 	// Loop through string, replacing run of digits with count
-	newNum := ""
-	idx := 0
-	for idx < len(num) {
+	var newNum []uint8
+	for idx := 0; idx < len(num); {
 		cchr := num[idx]
 		chrCnt := 1
 		// Loop forward while number matches
@@ -286,9 +292,29 @@ func lookAndSay(num string) string {
 			chrCnt++
 		}
 		idx += chrCnt
-		newNum += strconv.FormatInt(int64(chrCnt), 10) + string(cchr)
+		// Convert chrCnt into sequence of digits
+		for divisor := int(math.Log10(float64(chrCnt))); divisor >= 0; divisor-- {
+			digit := chrCnt / int(math.Pow10(divisor))
+			newNum = append(newNum, uint8(digit))
+			chrCnt -= digit * int(math.Pow10(divisor))
+		}
+		newNum = append(newNum, cchr)
 	}
 	return newNum
+}
+
+func lookAndSay(num string) string {
+	// Convert string into slice of integer
+	numSlice := make([]uint8, len(num))
+	for i := 0; i < len(num); i++ {
+		numSlice[i] = num[i] - '0'
+	}
+	newNum := lookAndSay2(numSlice)
+	// Convert back to string, index by '0'
+	for i := 0; i < len(newNum); i++ {
+		newNum[i] += '0'
+	}
+	return string(newNum)
 }
 
 func findShortestRoute(distMat [][]int, usedCities []int, fromCity int) int {
