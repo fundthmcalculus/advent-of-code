@@ -2,6 +2,7 @@ package aoc2015
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"github.com/fundthmcalculus/advent-of-code/helpers"
 	_ "github.com/fundthmcalculus/advent-of-code/helpers"
@@ -288,6 +289,79 @@ func Problem11() {
 	passwordA := findValidPassword("hepxcrrq")
 	fmt.Println("Problem 11A Answer:", passwordA)
 	fmt.Println("Problem 11B Answer:", findValidPassword(passwordA))
+}
+
+func Problem12() {
+	// Load the JSON file
+	jsonData := helpers.LoadInput(2015, 12, false)
+	var sum int
+	// Iterate one character at a time
+	for i := 0; i < len(jsonData); i++ {
+		// Look for a number
+		if jsonData[i] >= '0' && jsonData[i] <= '9' {
+			// Find the end of the number
+			j := i
+			for j < len(jsonData) && jsonData[j] >= '0' && jsonData[j] <= '9' {
+				j++
+			}
+			// Check if the previous character was a negative sign
+			if i > 0 && jsonData[i-1] == '-' {
+				i--
+			}
+			// Convert to integer
+			num, _ := strconv.Atoi(jsonData[i:j])
+			sum += num
+			i = j
+		}
+	}
+	fmt.Println("Problem 12A Answer:", sum)
+
+	// Parse into a map, ignore red
+	var sum2 int
+	var jsonDataMap map[string]interface{}
+	json.Unmarshal([]byte(jsonData), &jsonDataMap)
+	// Recursively sum the values
+	sum2 = sumJSON(jsonDataMap)
+	fmt.Println("Problem 12B Answer:", sum2)
+}
+
+func sumJSON(jsonDataMap map[string]interface{}) int {
+	var sum2 int
+	for k, v := range jsonDataMap {
+		if k == "red" {
+			return 0
+		}
+		switch v.(type) {
+		case string:
+			if v.(string) == "red" {
+				return 0
+			}
+		case float64:
+			sum2 += (int)(v.(float64))
+		case map[string]interface{}:
+			sum2 += sumJSON(v.(map[string]interface{}))
+		case []interface{}:
+			sum2 += sumJSONArray(v.([]interface{}))
+		}
+	}
+	return sum2
+}
+
+func sumJSONArray(jsonDataArray []interface{}) int {
+	var sum2 int
+	for _, v := range jsonDataArray {
+		switch v.(type) {
+		case string:
+			// Ignore
+		case float64:
+			sum2 += (int)(v.(float64))
+		case map[string]interface{}:
+			sum2 += sumJSON(v.(map[string]interface{}))
+		case []interface{}:
+			sum2 += sumJSONArray(v.([]interface{}))
+		}
+	}
+	return sum2
 }
 
 func findValidPassword(password string) string {
