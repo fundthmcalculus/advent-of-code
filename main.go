@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/fundthmcalculus/advent-of-code/aoc2015"
 	_ "github.com/fundthmcalculus/advent-of-code/aoc2015"
+	"github.com/fundthmcalculus/advent-of-code/aoc2024"
 )
 
 func main() {
@@ -17,9 +17,10 @@ func main() {
 	//aoc2015.Problem9()
 	//aoc2015.Problem10()
 	//aoc2015.Problem11()
-	aoc2015.Problem12()
+	//aoc2015.Problem12()
 	//aoc2023.Problem1()
 	//aoc2023.Problem2()
 	//aoc2023.Problem3()
 	//aoc2023.Problem4()
+	aoc2024.Problem7()
 }

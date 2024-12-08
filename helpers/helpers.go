@@ -31,16 +31,47 @@ func LoadInput(year int, day int, test bool) string {
 	return string(b)
 }
 
+func AllSame[S string](x []S, y S) bool {
+	for _, q := range x {
+		if q != y {
+			return false
+		}
+	}
+	return true
+}
+
 func ToInt(x []string) []int {
 	var y []int
 	for i := 0; i < len(x); i++ {
 		if x[i] == "" {
 			continue
 		}
-		xi, _ := strconv.ParseInt(x[i], 10, 32)
+		xi, _ := strconv.ParseInt(x[i], 10, 64)
 		y = append(y, int(xi))
 	}
 	return y
+}
+
+func ToInt64(x ...string) []int64 {
+	var y []int64
+	for i := 0; i < len(x); i++ {
+		if x[i] == "" {
+			continue
+		}
+		xi, _ := strconv.ParseInt(x[i], 10, 64)
+		y = append(y, xi)
+	}
+	return y
+}
+
+func Max[E Numeric](x ...E) E {
+	mx := E(0)
+	for _, es := range x {
+		if es > mx {
+			mx = es
+		}
+	}
+	return mx
 }
 
 func Add[S ~[]E, E Numeric](x E, y S) S {
@@ -63,7 +94,7 @@ func Pow[S Numeric](x S, y S) S {
 	return S(math.Pow(float64(x), float64(y)))
 }
 
-func Sum[S Numeric](x []S) S {
+func Sum[S Numeric](x ...S) S {
 	var z S
 	for _, x1 := range x {
 		z += x1
@@ -118,4 +149,9 @@ func InSlice[S ~[]E, E Numeric](x S, y E) bool {
 
 func Magnitude[S ~[]E, E Numeric](x S) float64 {
 	return math.Sqrt(SumSquare(x))
+}
+
+func Atoi(s string) int {
+	i, _ := strconv.ParseInt(s, 10, 64)
+	return int(i)
 }
